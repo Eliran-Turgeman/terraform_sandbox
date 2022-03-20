@@ -48,80 +48,84 @@ resource "aws_security_group" "allow_ssh" {
 }
 
 
-resource "aws_iam_role" "FullAccess_RDS_S3" {
-  name = "full_access_rds_s3"
+resource "aws_iam_role" "test_role" {
+  name = "TestRole"
 
-  assume_role_policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
+  assume_role_policy = jsonencode({ # what's the purpose of this?
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+})
+
+  inline_policy { # How can I use predefined policies?
+    name = "s3_full_access"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
         {
-            "Action": [
-                "rds:*",
-                "application-autoscaling:DeleteScalingPolicy",
-                "application-autoscaling:DeregisterScalableTarget",
-                "application-autoscaling:DescribeScalableTargets",
-                "application-autoscaling:DescribeScalingActivities",
-                "application-autoscaling:DescribeScalingPolicies",
-                "application-autoscaling:PutScalingPolicy",
-                "application-autoscaling:RegisterScalableTarget",
-                "cloudwatch:DescribeAlarms",
-                "cloudwatch:GetMetricStatistics",
-                "cloudwatch:PutMetricAlarm",
-                "cloudwatch:DeleteAlarms",
-                "ec2:DescribeAccountAttributes",
-                "ec2:DescribeAvailabilityZones",
-                "ec2:DescribeCoipPools",
-                "ec2:DescribeInternetGateways",
-                "ec2:DescribeLocalGatewayRouteTablePermissions",
-                "ec2:DescribeLocalGatewayRouteTables",
-                "ec2:DescribeLocalGatewayRouteTableVpcAssociations",
-                "ec2:DescribeLocalGateways",
-                "ec2:DescribeSecurityGroups",
-                "ec2:DescribeSubnets",
-                "ec2:DescribeVpcAttribute",
-                "ec2:DescribeVpcs",
-                "ec2:GetCoipPoolUsage",
-                "sns:ListSubscriptions",
-                "sns:ListTopics",
-                "sns:Publish",
-                "logs:DescribeLogStreams",
-                "logs:GetLogEvents",
-                "outposts:GetOutpostInstanceTypes"
-            ],
-            "Effect": "Allow",
-            "Resource": "*"
-        },
-        {
-            "Action": "pi:*",
-            "Effect": "Allow",
-            "Resource": "arn:aws:pi:*:*:metrics/rds/*"
-        },
-        {
-            "Action": "iam:CreateServiceLinkedRole",
-            "Effect": "Allow",
-            "Resource": "*",
-            "Condition": {
-                "StringLike": {
-                    "iam:AWSServiceName": [
-                        "rds.amazonaws.com",
-                        "rds.application-autoscaling.amazonaws.com"
-                    ]
-                }
-            }
-        },
-      {
         "Effect": "Allow",
             "Action": [
                 "s3:*",
                 "s3-object-lambda:*"
             ],
             "Resource": "*"
-      }
-    ]
-})
+      },
+      ]
+    })
+  }
 
   tags = {
-    Name = "Full Access S3 RDS"
+    Name = "Test Role"
+    Owner = "Eliran"
+  }
+}
+
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name = "ec2-profile-eliran"
+  role = aws_iam_role.test_role.name
+
+  tags = {
+    Owner = "Eliran"
+  }
+}
+
+
+resource "aws_s3_bucket" "test_bucket" {
+  bucket = "test-bucket-eliran"
+
+  tags = {
+    Name = "Test Bucket"
+    Owner = "Eliran"
+    Environment = "dev2"
+  }
+}
+
+
+resource "aws_s3_bucket_acl" "test_bucket_acl" {
+  bucket = aws_s3_bucket.test_bucket.id
+  acl    = "public-read"
+}
+
+
+resource "aws_instance" "ec2-eliran" {
+  ami           = "ami-0069d66985b09d219"
+  instance_type = "t2.micro"
+
+  subnet_id = aws_subnet.subnet_in_vpc.id
+  iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
+  security_groups = [aws_security_group.allow_ssh.id]
+
+  tags = {
+    Name = "ec2-eliran"
     Owner = "Eliran"
   }
 }
