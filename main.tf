@@ -48,8 +48,8 @@ resource "aws_security_group" "allow_ssh" {
 }
 
 
-resource "aws_iam_role" "test_role" {
-  name = "TestRole"
+resource "aws_iam_role" "test_role_eliran" {
+  name = "TestRoleEliran"
 
   assume_role_policy = jsonencode({ # what's the purpose of this?
   "Version": "2012-10-17",
@@ -65,7 +65,7 @@ resource "aws_iam_role" "test_role" {
   ]
 })
 
-  inline_policy { # How can I use predefined policies?
+  inline_policy {
     name = "s3_full_access"
 
     policy = jsonencode({
@@ -90,17 +90,47 @@ resource "aws_iam_role" "test_role" {
 }
 
 resource "aws_iam_instance_profile" "ec2_profile" {
-  name = "ec2-profile-eliran"
-  role = aws_iam_role.test_role.name
+  name = "ec2-profile-eliran2"
+  role = aws_iam_role.test_role_eliran.name
 
   tags = {
     Owner = "Eliran"
   }
 }
 
+resource "aws_s3_bucket_logging" "test_bucket_logging_eliran" {
+  bucket        = aws_s3_bucket.test_bucket_eliran.id
+  target_bucket = aws_s3_bucket.test_bucket_eliran.id
+  target_prefix = "log/"
+}
 
-resource "aws_s3_bucket" "test_bucket" {
-  bucket = "test-bucket-eliran"
+resource "aws_s3_bucket_server_side_encryption_configuration" "test_bucket_sse_eliran" {
+  bucket = aws_s3_bucket.test_bucket_eliran.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_versioning" "example" {
+  bucket = aws_s3_bucket.test_bucket_eliran.id
+  versioning_configuration {
+    status = "Enabled"
+    mfa_delete = "Enabled"
+  }
+#  mfa = (Optional, Required if versioning_configuration mfa_delete is enabled) The concatenation of the
+#  authentication device's serial number, a space, and the value that is displayed on your authentication device.
+}
+
+
+resource "aws_s3_bucket" "test_bucket_eliran" {
+  bucket = "test-bucket-eliran2"
+
+#  versioning {
+#    mfa_delete = true
+#  } can't find yet
 
   tags = {
     Name = "Test Bucket"
@@ -111,7 +141,7 @@ resource "aws_s3_bucket" "test_bucket" {
 
 
 resource "aws_s3_bucket_acl" "test_bucket_acl" {
-  bucket = aws_s3_bucket.test_bucket.id
+  bucket = aws_s3_bucket.test_bucket_eliran.id
   acl    = "public-read"
 }
 
@@ -131,15 +161,26 @@ resource "aws_instance" "ec2-eliran" {
 }
 
 
-resource "aws_db_instance" "mysql_eliran_db" {
-  allocated_storage    = 10
-  engine               = "mysql"
-  engine_version       = "5.7"
-  instance_class       = "db.t2.micro"
-  name                 = "mydb"
-  username             = "eliran"
-  password             = "eliran"
-  parameter_group_name = "default.mysql5.7"
-  skip_final_snapshot  = true
-}
+#resource "aws_db_subnet_group" "default" {
+#  name       = "main"
+#  subnet_ids = [aws_subnet.subnet_in_vpc.id]
+#
+#  tags = {
+#    Name = "My DB subnet group"
+#    Owner = "Eliran"
+#  }
+#}
+
+#resource "aws_db_instance" "mysql_eliran_db" {
+#  allocated_storage    = 10
+#  engine               = "mysql"
+#  engine_version       = "5.7"
+#  instance_class       = "db.t2.micro"
+#  db_name                 = "mydb"
+#  username             = "eliran"
+#  password             = "eliran"
+#  parameter_group_name = "default.mysql5.7"
+#  skip_final_snapshot  = true
+#  db_subnet_group_name = aws_db_subnet_group.default.name
+#}
 
