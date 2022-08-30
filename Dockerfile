@@ -1,6 +1,7 @@
 FROM amazonlinux:2
 WORKDIR /opt/cloudmapper
 ENV secret = AKIAIOSFODNN7EXAMAAA
+ENV not = a
 
 RUN yum update -y && yum install -y dracut-fips openssl
 RUN yum install -y python3 python3-pip
