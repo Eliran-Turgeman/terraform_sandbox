@@ -2,6 +2,10 @@ name: CI
 on:
   push:
     branches: [ main ]
+env:
+  NODE_ENV: development
+  GITHUB_TOKEN: ${{secrets.THIS_IS_A_TEST_SECRET}}
+  ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
 jobs:
   container-test-job:
     runs-on: ubuntu-latest
