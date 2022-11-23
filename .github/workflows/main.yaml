@@ -20,14 +20,10 @@ jobs:
       - name: Check for dockerenv file
         run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
       - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo ${{ env.ACTIONS_ALLOW_UNSECURE_COMMANDS }}
   
   second-job:
     runs-on: ubuntu-latest
     steps:
       - name: Dump GitHub env vars
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo ${{ env.ACTIONS_ALLOW_UNSECURE_COMMANDS }}
