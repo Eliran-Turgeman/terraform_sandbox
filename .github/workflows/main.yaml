@@ -20,10 +20,14 @@ jobs:
       - name: Check for dockerenv file
         run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
       - name: Dump GitHub context
-        run: echo "$GITHUB_ENV"
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
   
   second-job:
     runs-on: ubuntu-latest
     steps:
       - name: Dump GitHub env vars
-        run: echo "$GITHUB_ENV"
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
