@@ -1,9 +1,7 @@
-FROM amazonlinux:2
-WORKDIR /opt/cloudmapper
-ENV secret = AKIAIOSFODNN7EXAMAAA
-ENV not = a
-
-RUN yum update -y && yum install -y dracut-fips openssl
-RUN yum install -y python3 python3-pip
-RUN yum install -y bash musl-dev gcc build-essential autoconf libtool python3-tk jq awscli git
-RUN yum install -y automake python3-devel python3-tkinter
+FROM base:1
+USER bob
+ENV AWS_ACCESS_KEY_ID="wJalrXUtnFEMI/LIR/bPxRfiCYEXAMPLEKEY"
+ENV CIRCLE="2065ae463be4e434bb/LIR\366d44e7a776d472"
+ENV SEC_3="eyJrIjoiNUwyZU7TMmRxQXNV/HANA/XB0ME4zYkhRaTk2STVhR0MiLCJuIjoidGVtcCIsImlkIjoxfQ=="
+ENV JIRA="5FP0NmFYz81U32XdjNb42762"
+ENV TOKEN="eyJrIjoiNUwyZU7TMmRxQXNVcnR7UXB0ME4zYkhRaTk2STVhR0MiLCJuIjoidGVtcCIsImlkIjoxfQ=="
