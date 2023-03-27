@@ -18,4 +18,3 @@ readme = "rdme_xn8s9h0def16cebfb007195c89e1b4fa03db15085ef66f644af258d0a56b9e663
 RUN yum update -y && yum install -y dracut-fips openssl
 RUN yum install -y python3 python3-pip
 RUN yum install -y bash musl-dev gcc build-essential autoconf libtool python3-tk jq awscli git
-BLABLA RUUUUUN
